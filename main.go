@@ -12,21 +12,24 @@ func main() {
 	fmt.Printf("error: %s\n", err)
   }
 
+  defer ln.Close()
   for {
 	conn, err := ln.Accept()
 	if err != nil {
 	  fmt.Printf("error: %s\n", err)
 	}
 
-	readMessage(conn)
+	go readMessage(conn)
   }
 }
 
 func readMessage(conn net.Conn) {
-    msg, err := bufio.NewReader(conn).ReadString('\n')
-	if err != nil {
-		fmt.Printf("error: %s", err)
+	for {
+    	msg, err := bufio.NewReader(conn).ReadString('\n')
+		if err != nil {
+			fmt.Printf("error: %s", err)
+		}
+		fmt.Printf("%s: %s", conn.RemoteAddr(), msg)
+		conn.Write([]byte("hi\n"))
 	}
-	fmt.Printf("%s", msg)
-	conn.Write([]byte("hi"))
 }
