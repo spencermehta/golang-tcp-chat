@@ -1,16 +1,19 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"net"
 )
 
 func main() {
+  s := createServer()
+
   ln, err := net.Listen("tcp", ":8080")
   if err != nil {
 	fmt.Printf("error: %s\n", err)
   }
+
+  go s.run()
 
   defer ln.Close()
   for {
@@ -19,17 +22,6 @@ func main() {
 	  fmt.Printf("error: %s\n", err)
 	}
 
-	go readMessage(conn)
+	s.addClient(conn)
   }
-}
-
-func readMessage(conn net.Conn) {
-	for {
-    	msg, err := bufio.NewReader(conn).ReadString('\n')
-		if err != nil {
-			fmt.Printf("error: %s", err)
-		}
-		fmt.Printf("%s: %s", conn.RemoteAddr(), msg)
-		conn.Write([]byte("hi\n"))
-	}
 }
